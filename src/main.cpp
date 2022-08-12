@@ -8,44 +8,65 @@
 
 class JsonObject
 {
-private:
-    std::vector<std::string> body;
-    size_t size;
-
-    // struct Object;
+public:
+    struct Object;
 
     struct Object
     {
         std::string key;
-        std::vector<std::string> values;
-        // Object *objs;
-        Object(std::string key, std::vector<std::string> values) : key(key), values(values) {}
-
-        
+        std::vector<Object> object;
+        Object(std::string key, std::vector<Object> object) : key(key), object(object) {}
+        Object(std::string key) : key(key) {}
     };
+
+private:
+    std::vector<std::string> body;
+    size_t size = 0;
 
     void insert(Object obj)
     {
-        std::stringstream ss;
 
-        ss << "\t " << obj.key << ": " << "value";
+        std::stringstream ss;
+        if (size++ != 0)
+            ss << ",";
+
+        ss << "\n\t " << obj.key << ": ";
+        for (auto x : obj.object)
+        {
+            ss << x.key;
+        }
         body.push_back(ss.str());
     }
 
 public:
-    JsonObject() : body({"{\n"})
+    JsonObject() : body({"{"})
     {
-        insert(Object("name", {"vitor"}));
     }
 
     JsonObject(Object obj) {}
 
-    void CreateObject(Object obj)
+    // void CreateObject(Object obj)
+    // {
+    // }
+
+    Object CreateObject(std::string key, std::vector<Object> object)
     {
+        return Object(key, object);
     }
 
-    void CreateObject(std::string key, std::vector<std::string> values)
+    Object CreateObject(std::string key, std::string value)
     {
+        return Object(key, {Object(value)});
+    }
+
+    Object CreateObject(std::string key, Object obj)
+    {
+        return Object(key, {Object(obj)});
+    }
+
+    Object CreateObject(std::string key)
+    {
+        return Object(key);
     }
 
     const std::string GetBody() const
@@ -62,23 +83,16 @@ public:
     }
 };
 
-// std::string JSON_generator(const JsonObject &&keys)
-// {
-//     std::stringstream buffer;
-
-//     buffer << "{\n\t" << keys.GetKey() << ":";
-
-//     return buffer.str();
-// }
-
 int main()
 {
 
     // WriteFile("test.txt", "bla");
     JsonObject json;
     // Now Object is private
-    // json.CreateObject(JsonObject::Object("keys", {"value", "value1"}));
-    json.CreateObject("keys1", {"value", "value1"});
+    // json.CreateObject("keys", JsonObject::Object({"value", "value1"}));
+    JsonObject::Object obj1 = json.CreateObject("keys1", "values");
+    // json.CreateObject("keys2", "values");
+    std::cout << obj1.object[0].key << '\n';
 
-    std::cout << json.GetBody() << std::endl;
+    // std::cout << json.GetBody() << std::endl;
 }
