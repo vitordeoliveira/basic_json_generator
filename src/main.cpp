@@ -34,7 +34,9 @@ private:
         if (size++ != 0)
             body << ",";
 
-        body << "\n\t " << obj.key << ": ";
+        body << "\n\t "
+             << "\"" << obj.key << "\""
+             << ": ";
 
         bool addParanteses = obj.size > 0;
 
@@ -44,7 +46,7 @@ private:
         // size_t counter = 0;
         for (auto x : obj.object)
         {
-            body << x.key;
+            body << "\"" << x.key << "\"";
         }
 
         if (addParanteses)
@@ -89,6 +91,7 @@ public:
         Insert(obj);
     }
 
+
     const std::string GetBody()
     {
         body << "\n}";
@@ -99,16 +102,15 @@ public:
 int main()
 {
 
-    // WriteFile("test.txt", "bla");
-
     JsonObject json;
     JsonObject::Object obj1 = json.CreateObject("keys1", std::string("values"));
     JsonObject::Object obj2 = json.CreateObject("keys2", std::vector<std::string>{"values1", "values2"});
     JsonObject::Object obj3 = json.CreateObject("keys3", obj2);
 
     json.InsertObject(obj1);
-    json.InsertObject(obj2);
     json.InsertObject(obj3);
 
-    std::cout << json.GetBody() << std::endl;
+    // std::cout << json.GetBody() << std::endl;
+
+    WriteFile("test.json", json.GetBody());
 }
