@@ -92,10 +92,12 @@ public:
     }
 
 
-    const std::string GetBody()
+    const std::string GetBody() const
     {
-        body << "\n}";
-        return body.str();
+        std::stringstream cp;
+        cp << body.str();
+        cp << "\n}";
+        return cp.str();
     }
 };
 
@@ -109,8 +111,6 @@ int main()
 
     json.InsertObject(obj1);
     json.InsertObject(obj3);
-
-    // std::cout << json.GetBody() << std::endl;
 
     WriteFile("test.json", json.GetBody());
 }
