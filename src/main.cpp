@@ -15,43 +15,48 @@ public:
     {
         std::string key;
         std::vector<Object> object;
+        size_t size = 0;
         Object(std::string key, std::vector<Object> object) : key(key), object(object) {}
+        Object(std::string key, std::vector<Object> object, size_t size) : key(key), object(object), size(size) {}
         Object(std::string key) : key(key) {}
     };
 
 private:
-    std::vector<std::string> body;
+    std::stringstream body;
     size_t size = 0;
 
-    void insert(Object obj)
+    void Insert(Object obj)
     {
 
-        std::stringstream ss;
-        if (size++ != 0)
-            ss << ",";
+        if (size == 0)
+            body << "{";
 
-        ss << "\n\t " << obj.key << ": ";
+        if (size++ != 0)
+            body << ",";
+
+        body << "\n\t " << obj.key << ": ";
+
+        bool addParanteses = obj.size > 0;
+
+        if (addParanteses)
+            body << "{";
+
+        // size_t counter = 0;
         for (auto x : obj.object)
         {
-            ss << x.key;
+            body << x.key;
         }
-        body.push_back(ss.str());
+
+        if (addParanteses)
+            body << "}";
     }
 
 public:
-    JsonObject() : body({"{"})
-    {
-    }
-
-    JsonObject(Object obj) {}
-
-    // void CreateObject(Object obj)
-    // {
-    // }
+    JsonObject() {}
 
     Object CreateObject(std::string key, std::vector<Object> object)
     {
-        return Object(key, object);
+        return Object(key, object, object.size());
     }
 
     Object CreateObject(std::string key, std::string value)
@@ -59,7 +64,17 @@ public:
         return Object(key, {Object(value)});
     }
 
-    Object CreateObject(std::string key, Object obj)
+    Object CreateObject(std::string key, std::vector<std::string> values)
+    {
+        std::vector<Object> object;
+        for (auto x : values)
+        {
+            object.push_back(x);
+        }
+        return Object(key, object, object.size());
+    }
+
+    const Object CreateObject(std::string key, Object &obj) const
     {
         return Object(key, {Object(obj)});
     }
@@ -69,17 +84,15 @@ public:
         return Object(key);
     }
 
-    const std::string GetBody() const
+    const void InsertObject(const Object &obj)
     {
-        std::stringstream buffer;
+        Insert(obj);
+    }
 
-        for (auto i : body)
-        {
-            buffer << i;
-        }
-
-        buffer << "\n}";
-        return buffer.str();
+    const std::string GetBody()
+    {
+        body << "\n}";
+        return body.str();
     }
 };
 
@@ -87,12 +100,15 @@ int main()
 {
 
     // WriteFile("test.txt", "bla");
-    JsonObject json;
-    // Now Object is private
-    // json.CreateObject("keys", JsonObject::Object({"value", "value1"}));
-    JsonObject::Object obj1 = json.CreateObject("keys1", "values");
-    // json.CreateObject("keys2", "values");
-    std::cout << obj1.object[0].key << '\n';
 
-    // std::cout << json.GetBody() << std::endl;
+    JsonObject json;
+    JsonObject::Object obj1 = json.CreateObject("keys1", std::string("values"));
+    JsonObject::Object obj2 = json.CreateObject("keys2", std::vector<std::string>{"values1", "values2"});
+    JsonObject::Object obj3 = json.CreateObject("keys3", obj2);
+
+    json.InsertObject(obj1);
+    json.InsertObject(obj2);
+    json.InsertObject(obj3);
+
+    std::cout << json.GetBody() << std::endl;
 }
